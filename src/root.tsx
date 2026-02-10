@@ -46,15 +46,15 @@ export const RemotionRoot: React.FC = () => {
         component={MyComposition}
         schema={codeEditorSchema}
         defaultProps={{
-          backgroundImage: "background.jpg",
+          backgroundImage: "background.png",
           filename: "App.tsx",
           code: defaultCode,
           lineTimings: defaultLineTimings,
         }}
         calculateMetadata={calculateMetadata}
         fps={30}
-        width={1280}
-        height={720}
+        width={1140}
+        height={850}
       />
     </>
   );

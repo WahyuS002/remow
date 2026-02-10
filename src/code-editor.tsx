@@ -7,7 +7,10 @@ import {
   useCurrentFrame,
 } from "remotion";
 import { z } from "zod";
+import { loadFont } from "@remotion/google-fonts/KodeMono";
 import { getVisibleLines } from "./typing";
+
+const { fontFamily } = loadFont();
 
 export const codeEditorSchema = z.object({
   backgroundImage: z.string(),
@@ -90,8 +93,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       >
         <div
           style={{
-            width: 900,
-            height: 400,
+            width: 969,
+            height: 722,
             borderRadius: 12,
             overflow: "hidden",
             boxShadow: "0 25px 60px rgba(0, 0, 0, 0.5)",
@@ -102,7 +105,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           {/* Title bar */}
           <div
             style={{
-              background: "#e8e8e8",
+              background: "#fbfaf9",
               padding: "12px 16px",
               display: "flex",
               alignItems: "center",
@@ -116,7 +119,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#c0c0c0",
+                  backgroundColor: "#dddedc",
                 }}
               />
               <div
@@ -124,7 +127,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#c0c0c0",
+                  backgroundColor: "#dddedc",
                 }}
               />
               <div
@@ -132,7 +135,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#c0c0c0",
+                  backgroundColor: "#dddedc",
                 }}
               />
             </div>
@@ -146,8 +149,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 textAlign: "center",
                 fontSize: 13,
                 color: "#666",
-                fontFamily:
-                  '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontFamily,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -162,11 +164,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <div
             style={{
               flex: 1,
-              background: "#ffffff",
-              padding: "16px 0",
-              fontFamily: '"SF Mono", "Fira Code", "Consolas", monospace',
-              fontSize: 14,
-              lineHeight: "24px",
+              background: "#fbfaf9",
+              padding: "20px 0",
+              fontFamily,
+              fontSize: 21,
+              lineHeight: "36px",
             }}
           >
             {visibleLines.map((lineText, index) => {
@@ -178,25 +180,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   key={index}
                   style={{
                     display: "flex",
-                    backgroundColor: isActive ? "#f3f4f6" : "transparent",
-                    padding: "0 20px",
+                    alignItems: "stretch",
+                    backgroundColor: isActive ? "#f1f2f1" : "transparent",
+                    padding: "0 24px",
                   }}
                 >
                   <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
                     {lineText}
-                    {isActive && cursorVisible && (
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: 2,
-                          height: 18,
-                          backgroundColor: "#14b8a6",
-                          marginLeft: 1,
-                          verticalAlign: "middle",
-                        }}
-                      />
-                    )}
                   </span>
+                  {isActive && cursorVisible && (
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 2.5,
+                        backgroundColor: "#14b8a6",
+                        marginLeft: 1,
+                      }}
+                    />
+                  )}
                 </div>
               );
             })}
