@@ -1,102 +1,51 @@
-export type TypeAction = { type: "type"; text: string; speed?: number };
-export type WaitAction = { type: "wait"; frames: number };
-export type NewlineAction = { type: "newline" };
-export type Action = TypeAction | WaitAction | NewlineAction;
-
-export type TimelineEntry = {
-  startFrame: number;
-  endFrame: number;
-  action: Action;
+export type EmojiItem = {
+  emoji: string;
+  name: string;
 };
 
-export type Timeline = {
-  entries: TimelineEntry[];
-  totalFrames: number;
-};
-
-export type LineTiming = {
+export type Segment = {
+  type: "type" | "pause" | "select";
+  text: string;
+  replaceLength: number;
+  insertText: string;
   startFrame: number;
   durationInFrames: number;
+  dropdownItems: EmojiItem[];
 };
 
-export function generateLineTimings(
-  lines: string[],
-  typingSpeed = 1.5,
-  pauseGap = 8,
-): LineTiming[] {
-  const timings: LineTiming[] = [];
-  let currentFrame = 0;
+export type EditorState = {
+  text: string;
+  dropdownItems: EmojiItem[] | null;
+};
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const duration =
-      line.length > 0 ? Math.ceil(line.length / typingSpeed) : 1;
-
-    timings.push({ startFrame: currentFrame, durationInFrames: duration });
-
-    currentFrame += duration;
-
-    // Add gap after non-empty lines (except the last line)
-    if (line.length > 0 && i < lines.length - 1) {
-      currentFrame += pauseGap;
-    }
-  }
-
-  return timings;
-}
-
-export function getVisibleLines(
+export function computeEditorState(
   frame: number,
-  lines: string[],
-  timings: LineTiming[],
-): (string | null)[] {
-  return lines.map((line, i) => {
-    const timing = timings[i];
-    if (!timing || frame < timing.startFrame) return null;
-
-    const elapsed = frame - timing.startFrame;
-    const progress = Math.min(1, elapsed / timing.durationInFrames);
-    const chars = Math.floor(progress * line.length);
-    return line.slice(0, chars);
-  });
-}
-
-export function buildTimeline(actions: Action[]): Timeline {
-  let frame = 0;
-  const entries: TimelineEntry[] = [];
-
-  for (const action of actions) {
-    let duration: number;
-    if (action.type === "type") {
-      duration = Math.ceil(action.text.length / (action.speed ?? 1));
-    } else if (action.type === "wait") {
-      duration = action.frames;
-    } else {
-      duration = 1;
-    }
-    entries.push({ startFrame: frame, endFrame: frame + duration, action });
-    frame += duration;
-  }
-
-  return { entries, totalFrames: frame };
-}
-
-export function getVisibleText(frame: number, timeline: Timeline): string {
+  segments: Segment[],
+): EditorState {
   let text = "";
+  let dropdownItems: EmojiItem[] | null = null;
 
-  for (const entry of timeline.entries) {
-    if (frame < entry.startFrame) break;
+  for (const seg of segments) {
+    if (frame < seg.startFrame) break;
 
-    if (entry.action.type === "type") {
-      const duration = entry.endFrame - entry.startFrame;
-      const progress = Math.min(1, (frame - entry.startFrame) / duration);
-      const chars = Math.floor(progress * entry.action.text.length);
-      text += entry.action.text.slice(0, chars);
-    } else if (entry.action.type === "newline") {
-      text += "\n";
+    if (seg.type === "type") {
+      const elapsed = frame - seg.startFrame;
+      const progress = Math.min(1, elapsed / seg.durationInFrames);
+      const chars = Math.floor(progress * seg.text.length);
+      text += seg.text.slice(0, chars);
+    } else if (seg.type === "select") {
+      text =
+        text.slice(0, Math.max(0, text.length - seg.replaceLength)) +
+        seg.insertText;
     }
-    // "wait" adds nothing
+
+    // Update dropdown: segments with items show them; "select" hides
+    if (seg.dropdownItems.length > 0) {
+      dropdownItems = seg.dropdownItems;
+    } else if (seg.type === "select") {
+      dropdownItems = null;
+    }
   }
 
-  return text;
+  return { text, dropdownItems };
 }

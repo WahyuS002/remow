@@ -2,40 +2,118 @@ import "./index.css";
 import { Composition } from "remotion";
 import { MyComposition } from "./composition";
 import { CodeEditorProps, codeEditorSchema } from "./code-editor";
-import { generateLineTimings } from "./typing";
+import type { Segment } from "./typing";
 
-const defaultCode = `import React from "react";
-
-export const App: React.FC = () => {
-  return (
-    <div className="app">
-      <h1>Hello, World!</h1>
-    </div>
-  );
-};`;
-
-const defaultLines = defaultCode.split("\n");
-const defaultLineTimings = generateLineTimings(defaultLines);
+const defaultSegments: Segment[] = [
+  {
+    type: "type",
+    text: "Hello",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 0,
+    durationInFrames: 24,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: " ",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 24,
+    durationInFrames: 3,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: ":",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 27,
+    durationInFrames: 1,
+    dropdownItems: [
+      { emoji: "💕", name: "ty" },
+      { emoji: "🙏", name: "blob pray" },
+      { emoji: "🖤", name: "black heart" },
+      { emoji: "🤣", name: "lol" },
+      { emoji: "👍", name: "thumbs up" },
+      { emoji: "🆒", name: "nice" },
+      { emoji: "🙏", name: "prayer hands" },
+      { emoji: "👀", name: "eyes" },
+      { emoji: "🐸", name: "frog wave" },
+      { emoji: "😅", name: "sweat smile" },
+    ],
+  },
+  {
+    type: "pause",
+    text: "",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 28,
+    durationInFrames: 20,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: "wa",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 48,
+    durationInFrames: 6,
+    dropdownItems: [
+      { emoji: "👋", name: "wave" },
+      { emoji: "🐸", name: "frog wave" },
+      { emoji: "😅", name: "sweat smile" },
+    ],
+  },
+  {
+    type: "pause",
+    text: "",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 54,
+    durationInFrames: 15,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: "ve",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 69,
+    durationInFrames: 6,
+    dropdownItems: [
+      { emoji: "👋", name: "wave" },
+      { emoji: "🐸", name: "frog wave" },
+    ],
+  },
+  {
+    type: "pause",
+    text: "",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 75,
+    durationInFrames: 15,
+    dropdownItems: [],
+  },
+  {
+    type: "select",
+    text: "",
+    replaceLength: 5,
+    insertText: "👋",
+    startFrame: 90,
+    durationInFrames: 1,
+    dropdownItems: [],
+  },
+];
 
 const calculateMetadata = ({ props }: { props: CodeEditorProps }) => {
-  const lines = props.code.split("\n");
-
-  let lineTimings = props.lineTimings;
-  if (lineTimings.length !== lines.length) {
-    lineTimings = generateLineTimings(lines);
-  }
-
   const durationInFrames =
-    Math.max(...lineTimings.map((t) => t.startFrame + t.durationInFrames), 1) +
-    30;
-
-  return {
-    durationInFrames,
-    props: {
-      ...props,
-      lineTimings,
-    },
-  };
+    props.segments.length > 0
+      ? Math.max(
+          ...props.segments.map((s) => s.startFrame + s.durationInFrames),
+        ) + 30
+      : 60;
+  return { durationInFrames };
 };
 
 export const RemotionRoot: React.FC = () => {
@@ -47,9 +125,8 @@ export const RemotionRoot: React.FC = () => {
         schema={codeEditorSchema}
         defaultProps={{
           backgroundImage: "background.png",
-          filename: "App.tsx",
-          code: defaultCode,
-          lineTimings: defaultLineTimings,
+          filename: "playground/text.mdx",
+          segments: defaultSegments,
         }}
         calculateMetadata={calculateMetadata}
         fps={30}

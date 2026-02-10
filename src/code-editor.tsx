@@ -8,20 +8,29 @@ import {
 } from "remotion";
 import { z } from "zod";
 import { loadFont } from "@remotion/google-fonts/KodeMono";
-import { getVisibleLines } from "./typing";
+import { computeEditorState } from "./typing";
 
 const { fontFamily } = loadFont();
+
+const emojiItemSchema = z.object({
+  emoji: z.string(),
+  name: z.string(),
+});
+
+const segmentSchema = z.object({
+  type: z.enum(["type", "pause", "select"]),
+  text: z.string(),
+  replaceLength: z.number().min(0).step(1),
+  insertText: z.string(),
+  startFrame: z.number().min(0).step(1),
+  durationInFrames: z.number().min(1).step(1),
+  dropdownItems: z.array(emojiItemSchema),
+});
 
 export const codeEditorSchema = z.object({
   backgroundImage: z.string(),
   filename: z.string(),
-  code: z.string(),
-  lineTimings: z.array(
-    z.object({
-      startFrame: z.number().min(0).step(1),
-      durationInFrames: z.number().min(1).step(1),
-    }),
-  ),
+  segments: z.array(segmentSchema),
 });
 
 export type CodeEditorProps = z.infer<typeof codeEditorSchema>;
@@ -29,43 +38,43 @@ export type CodeEditorProps = z.infer<typeof codeEditorSchema>;
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   backgroundImage,
   filename,
-  code,
-  lineTimings,
+  segments,
 }) => {
   const frame = useCurrentFrame();
-  const lines = useMemo(() => code.split("\n"), [code]);
-  const visibleLines = useMemo(
-    () => getVisibleLines(frame, lines, lineTimings),
-    [frame, lines, lineTimings],
+  const { text, dropdownItems } = useMemo(
+    () => computeEditorState(frame, segments),
+    [frame, segments],
   );
 
   const cursorVisible = Math.floor(frame / 15) % 2 === 0;
 
-  // Find the last line that has started typing (for cursor placement)
-  let activeLineIndex = -1;
-  for (let i = visibleLines.length - 1; i >= 0; i--) {
-    if (visibleLines[i] !== null) {
-      activeLineIndex = i;
-      break;
-    }
-  }
+  // Find ":" position for dropdown placement
+  const colonIndex = dropdownItems ? text.lastIndexOf(":") : -1;
+  const showDropdown =
+    dropdownItems !== null &&
+    dropdownItems.length > 0 &&
+    colonIndex !== -1;
 
   return (
     <AbsoluteFill>
       {/* Sequence bars for timeline visualization */}
-      {lines.map((line, i) => {
-        const timing = lineTimings[i];
-        if (!timing) return null;
-        const label = line.trim()
-          ? `Line ${i + 1}: ${line.trim().slice(0, 40)}`
-          : `Line ${i + 1}: (empty)`;
+      {segments.map((seg, i) => {
+        let label: string;
+        if (seg.type === "type") {
+          const displayText = seg.text === " " ? "(space)" : seg.text;
+          label = `Type: ${displayText}`;
+        } else if (seg.type === "pause") {
+          label = "Pause";
+        } else {
+          label = `Select: ${seg.insertText}`;
+        }
         return (
           <Sequence
             key={i}
             layout="none"
             name={label}
-            from={timing.startFrame}
-            durationInFrames={timing.durationInFrames}
+            from={seg.startFrame}
+            durationInFrames={seg.durationInFrames}
           >
             <></>
           </Sequence>
@@ -140,7 +149,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               />
             </div>
 
-            {/* Filename centered */}
+            {/* Filename centered with modified indicator */}
             <div
               style={{
                 position: "absolute",
@@ -157,6 +166,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               }}
             >
               {filename}
+              <div
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  backgroundColor: "#c0c0c0",
+                }}
+              />
             </div>
           </div>
 
@@ -164,6 +181,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <div
             style={{
               flex: 1,
+              position: "relative",
               background: "#fbfaf9",
               padding: "20px 0",
               fontFamily,
@@ -171,36 +189,72 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               lineHeight: "36px",
             }}
           >
-            {visibleLines.map((lineText, index) => {
-              if (lineText === null) return null;
-              const isActive = index === activeLineIndex;
-
-              return (
-                <div
-                  key={index}
+            {/* Active line */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "stretch",
+                backgroundColor: "#f1f2f1",
+                padding: "0 24px",
+              }}
+            >
+              <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
+                {text}
+              </span>
+              {cursorVisible && (
+                <span
                   style={{
-                    display: "flex",
-                    alignItems: "stretch",
-                    backgroundColor: isActive ? "#f1f2f1" : "transparent",
-                    padding: "0 24px",
+                    display: "inline-block",
+                    width: 2.5,
+                    backgroundColor: "#14b8a6",
+                    marginLeft: 1,
                   }}
-                >
-                  <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
-                    {lineText}
-                  </span>
-                  {isActive && cursorVisible && (
+                />
+              )}
+            </div>
+
+            {/* Emoji dropdown */}
+            {showDropdown && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 56,
+                  left: `calc(24px + ${colonIndex}ch)`,
+                  background: "#ffffff",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: 8,
+                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
+                  overflow: "hidden",
+                  minWidth: 200,
+                  zIndex: 10,
+                }}
+              >
+                {dropdownItems.map((item, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "8px 14px",
+                      backgroundColor: i === 0 ? "#d8ede2" : "transparent",
+                    }}
+                  >
+                    <span style={{ fontSize: 24 }}>{item.emoji}</span>
                     <span
                       style={{
-                        display: "inline-block",
-                        width: 2.5,
-                        backgroundColor: "#14b8a6",
-                        marginLeft: 1,
+                        fontSize: 18,
+                        color: i === 0 ? "#1a1a1a" : "#999",
+                        fontWeight: i === 0 ? 600 : 400,
+                        fontFamily,
                       }}
-                    />
-                  )}
-                </div>
-              );
-            })}
+                    >
+                      {item.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </AbsoluteFill>
