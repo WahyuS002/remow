@@ -53,6 +53,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <div
           style={{
             width: 900,
+            height: 400,
             borderRadius: 12,
             overflow: "hidden",
             boxShadow: "0 25px 60px rgba(0, 0, 0, 0.5)",
@@ -77,7 +78,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#ff5f57",
+                  backgroundColor: "#c0c0c0",
                 }}
               />
               <div
@@ -85,7 +86,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#febc2e",
+                  backgroundColor: "#c0c0c0",
                 }}
               />
               <div
@@ -93,7 +94,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#28c840",
+                  backgroundColor: "#c0c0c0",
                 }}
               />
             </div>
@@ -115,14 +116,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 gap: 6,
               }}
             >
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: "#999",
-                }}
-              />
               {filename}
             </div>
           </div>
@@ -130,6 +123,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           {/* Editor body */}
           <div
             style={{
+              flex: 1,
               background: "#ffffff",
               padding: "16px 0",
               fontFamily: '"SF Mono", "Fira Code", "Consolas", monospace',
@@ -138,33 +132,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             }}
           >
             {visibleLines.map((line, index) => {
-              const lineNumber = index + 1;
               const isActive = index === activeLineIndex;
 
               return (
                 <div
-                  key={lineNumber}
+                  key={index}
                   style={{
                     display: "flex",
                     backgroundColor: isActive ? "#f3f4f6" : "transparent",
                     padding: "0 20px",
                   }}
                 >
-                  {/* Line number */}
-                  <span
-                    style={{
-                      width: 40,
-                      textAlign: "right",
-                      color: "#9ca3af",
-                      marginRight: 20,
-                      userSelect: "none",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {lineNumber}
-                  </span>
-
-                  {/* Code content */}
                   <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
                     {line}
                     {isActive && cursorVisible && (
