@@ -2,15 +2,7 @@ import "./index.css";
 import { Composition } from "remotion";
 import { MyComposition } from "./composition";
 import { CodeEditorProps, codeEditorSchema } from "./code-editor";
-import { buildTimeline, codeToActions } from "./typing";
-
-const calculateMetadata = ({ props }: { props: CodeEditorProps }) => {
-  const actions = codeToActions(props.code, props.typingSpeed, props.pauseAfterLine);
-  const timeline = buildTimeline(actions);
-  return {
-    durationInFrames: timeline.totalFrames + 30,
-  };
-};
+import { generateLineTimings } from "./typing";
 
 const defaultCode = `import React from "react";
 
@@ -21,6 +13,30 @@ export const App: React.FC = () => {
     </div>
   );
 };`;
+
+const defaultLines = defaultCode.split("\n");
+const defaultLineTimings = generateLineTimings(defaultLines);
+
+const calculateMetadata = ({ props }: { props: CodeEditorProps }) => {
+  const lines = props.code.split("\n");
+
+  let lineTimings = props.lineTimings;
+  if (lineTimings.length !== lines.length) {
+    lineTimings = generateLineTimings(lines);
+  }
+
+  const durationInFrames =
+    Math.max(...lineTimings.map((t) => t.startFrame + t.durationInFrames), 1) +
+    30;
+
+  return {
+    durationInFrames,
+    props: {
+      ...props,
+      lineTimings,
+    },
+  };
+};
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -33,8 +49,7 @@ export const RemotionRoot: React.FC = () => {
           backgroundImage: "background.jpg",
           filename: "App.tsx",
           code: defaultCode,
-          typingSpeed: 1.5,
-          pauseAfterLine: 8,
+          lineTimings: defaultLineTimings,
         }}
         calculateMetadata={calculateMetadata}
         fps={30}

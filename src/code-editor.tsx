@@ -1,14 +1,24 @@
 import { useMemo } from "react";
-import { AbsoluteFill, Img, staticFile, useCurrentFrame } from "remotion";
+import {
+  AbsoluteFill,
+  Img,
+  Sequence,
+  staticFile,
+  useCurrentFrame,
+} from "remotion";
 import { z } from "zod";
-import { buildTimeline, codeToActions, getVisibleText } from "./typing";
+import { getVisibleLines } from "./typing";
 
 export const codeEditorSchema = z.object({
   backgroundImage: z.string(),
   filename: z.string(),
   code: z.string(),
-  typingSpeed: z.number().min(0.1).max(5).step(0.1),
-  pauseAfterLine: z.number().min(0).max(30).step(1),
+  lineTimings: z.array(
+    z.object({
+      startFrame: z.number().min(0).step(1),
+      durationInFrames: z.number().min(1).step(1),
+    }),
+  ),
 });
 
 export type CodeEditorProps = z.infer<typeof codeEditorSchema>;
@@ -17,22 +27,48 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   backgroundImage,
   filename,
   code,
-  typingSpeed,
-  pauseAfterLine,
+  lineTimings,
 }) => {
   const frame = useCurrentFrame();
-  const actions = useMemo(
-    () => codeToActions(code, typingSpeed, pauseAfterLine),
-    [code, typingSpeed, pauseAfterLine],
+  const lines = useMemo(() => code.split("\n"), [code]);
+  const visibleLines = useMemo(
+    () => getVisibleLines(frame, lines, lineTimings),
+    [frame, lines, lineTimings],
   );
-  const timeline = useMemo(() => buildTimeline(actions), [actions]);
-  const visibleText = getVisibleText(frame, timeline);
-  const visibleLines = visibleText.split("\n");
+
   const cursorVisible = Math.floor(frame / 15) % 2 === 0;
-  const activeLineIndex = visibleLines.length - 1;
+
+  // Find the last line that has started typing (for cursor placement)
+  let activeLineIndex = -1;
+  for (let i = visibleLines.length - 1; i >= 0; i--) {
+    if (visibleLines[i] !== null) {
+      activeLineIndex = i;
+      break;
+    }
+  }
 
   return (
     <AbsoluteFill>
+      {/* Sequence bars for timeline visualization */}
+      {lines.map((line, i) => {
+        const timing = lineTimings[i];
+        if (!timing) return null;
+        const label = line.trim()
+          ? `Line ${i + 1}: ${line.trim().slice(0, 40)}`
+          : `Line ${i + 1}: (empty)`;
+        return (
+          <Sequence
+            key={i}
+            layout="none"
+            name={label}
+            from={timing.startFrame}
+            durationInFrames={timing.durationInFrames}
+          >
+            <></>
+          </Sequence>
+        );
+      })}
+
       {/* Background image */}
       <AbsoluteFill>
         <Img
@@ -133,7 +169,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               lineHeight: "24px",
             }}
           >
-            {visibleLines.map((line, index) => {
+            {visibleLines.map((lineText, index) => {
+              if (lineText === null) return null;
               const isActive = index === activeLineIndex;
 
               return (
@@ -146,7 +183,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   }}
                 >
                   <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
-                    {line}
+                    {lineText}
                     {isActive && cursorVisible && (
                       <span
                         style={{

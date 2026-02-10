@@ -14,28 +14,51 @@ export type Timeline = {
   totalFrames: number;
 };
 
-export function codeToActions(
-  code: string,
-  typingSpeed: number,
-  pauseAfterLine: number,
-): Action[] {
-  const lines = code.split("\n");
-  const actions: Action[] = [];
+export type LineTiming = {
+  startFrame: number;
+  durationInFrames: number;
+};
+
+export function generateLineTimings(
+  lines: string[],
+  typingSpeed = 1.5,
+  pauseGap = 8,
+): LineTiming[] {
+  const timings: LineTiming[] = [];
+  let currentFrame = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    actions.push({ type: "type", text: line, speed: typingSpeed });
+    const duration =
+      line.length > 0 ? Math.ceil(line.length / typingSpeed) : 1;
 
-    if (line.length > 0 && pauseAfterLine > 0) {
-      actions.push({ type: "wait", frames: pauseAfterLine });
-    }
+    timings.push({ startFrame: currentFrame, durationInFrames: duration });
 
-    if (i < lines.length - 1) {
-      actions.push({ type: "newline" });
+    currentFrame += duration;
+
+    // Add gap after non-empty lines (except the last line)
+    if (line.length > 0 && i < lines.length - 1) {
+      currentFrame += pauseGap;
     }
   }
 
-  return actions;
+  return timings;
+}
+
+export function getVisibleLines(
+  frame: number,
+  lines: string[],
+  timings: LineTiming[],
+): (string | null)[] {
+  return lines.map((line, i) => {
+    const timing = timings[i];
+    if (!timing || frame < timing.startFrame) return null;
+
+    const elapsed = frame - timing.startFrame;
+    const progress = Math.min(1, elapsed / timing.durationInFrames);
+    const chars = Math.floor(progress * line.length);
+    return line.slice(0, chars);
+  });
 }
 
 export function buildTimeline(actions: Action[]): Timeline {
