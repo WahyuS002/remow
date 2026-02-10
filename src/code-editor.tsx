@@ -48,7 +48,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   // Cursor always visible during typing; blink resets when typing stops
   const framesSinceTyping = frame - lastTypingEndFrame;
-  const cursorVisible = framesSinceTyping < 15 || Math.floor(framesSinceTyping / 15) % 2 === 0;
+  const cursorVisible =
+    framesSinceTyping < 15 || Math.floor(framesSinceTyping / 15) % 2 === 0;
 
   // Split text into lines for multi-line rendering
   const lines = text.split("\n");
@@ -107,11 +108,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       >
         <div
           style={{
-            width: 969,
-            height: 722,
-            borderRadius: 12,
+            width: 1454,
+            height: 1084,
+            borderRadius: 20,
             overflow: "hidden",
-            boxShadow: "0 25px 60px rgba(0, 0, 0, 0.5)",
+            boxShadow: "0 40px 100px rgba(0, 0, 0, 0.5)",
+            background: "#fbfaf9",
             display: "flex",
             flexDirection: "column",
           }}
@@ -119,35 +121,34 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           {/* Title bar */}
           <div
             style={{
-              background: "#fbfaf9",
-              padding: "12px 16px",
+              padding: "20px 27px",
               display: "flex",
               alignItems: "center",
               position: "relative",
             }}
           >
             {/* Traffic light dots */}
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 13 }}>
               <div
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: 20,
+                  height: 20,
                   borderRadius: "50%",
                   backgroundColor: "#dddedc",
                 }}
               />
               <div
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: 20,
+                  height: 20,
                   borderRadius: "50%",
                   backgroundColor: "#dddedc",
                 }}
               />
               <div
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: 20,
+                  height: 20,
                   borderRadius: "50%",
                   backgroundColor: "#dddedc",
                 }}
@@ -161,22 +162,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 left: 0,
                 right: 0,
                 textAlign: "center",
-                fontSize: 13,
-                color: "#666",
+                fontSize: 23,
+                color: "#b4bcbc",
                 fontFamily,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 6,
+                gap: 10,
               }}
             >
               {filename}
               <div
                 style={{
-                  width: 7,
-                  height: 7,
+                  width: 12,
+                  height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#c0c0c0",
+                  backgroundColor: "#e2e6e7",
                 }}
               />
             </div>
@@ -187,11 +188,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             style={{
               flex: 1,
               position: "relative",
-              background: "#fbfaf9",
-              padding: "20px 0",
+              padding: "34px 0",
               fontFamily,
-              fontSize: 21,
-              lineHeight: "36px",
+              fontSize: 35,
+              lineHeight: "60px",
             }}
           >
             {/* Lines */}
@@ -203,20 +203,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   style={{
                     display: "flex",
                     alignItems: "stretch",
+                    minHeight: 60,
                     backgroundColor: isActive ? "#f1f2f1" : "transparent",
-                    padding: "0 24px",
+                    padding: "0 40px",
                   }}
                 >
-                  <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
+                  <span style={{ color: "#41403f", whiteSpace: "pre" }}>
                     {line}
                   </span>
                   {isActive && cursorVisible && (
                     <span
                       style={{
                         display: "inline-block",
-                        width: 2.5,
+                        width: 4,
                         backgroundColor: "#14b8a6",
-                        marginLeft: 1,
+                        marginLeft: 2,
                       }}
                     />
                   )}
@@ -229,15 +230,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <div
                 style={{
                   position: "absolute",
-                  top: 20 + (activeLineIndex + 1) * 36,
-                  left: `calc(24px + ${colonIndex}ch)`,
+                  top: 34 + (activeLineIndex + 1) * 60,
+                  left: `calc(40px + ${colonIndex}ch)`,
                   background: "#ffffff",
                   border: "1px solid #e5e5e5",
-                  borderRadius: 3,
+                  borderRadius: 5,
                   overflow: "hidden",
-                  minWidth: 200,
+                  minWidth: 340,
                   zIndex: 10,
-                  padding: 4,
+                  padding: 6,
                 }}
               >
                 {dropdownItems.map((item, i) => (
@@ -246,15 +247,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 10,
-                      padding: "0px 14px",
+                      gap: 16,
+                      padding: "2px 22px",
                       backgroundColor: i === 0 ? "#d0e5e1" : "transparent",
                     }}
                   >
-                    <span style={{ fontSize: 24 }}>{item.emoji}</span>
+                    <span style={{ fontSize: 40 }}>{item.emoji}</span>
                     <span
                       style={{
-                        fontSize: 18,
+                        fontSize: 30,
                         color: i === 0 ? "#1a1a1a" : "#999",
                         fontWeight: i === 0 ? 600 : 400,
                         fontFamily,

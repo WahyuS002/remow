@@ -114,30 +114,75 @@ const defaultSegments: Segment[] = [
     dropdownItems: [],
   },
   {
+    type: "type",
+    text: "\n",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 116,
+    durationInFrames: 1,
+    dropdownItems: [],
+  },
+  {
     type: "pause",
     text: "",
     replaceLength: 0,
     insertText: "",
-    startFrame: 101,
-    durationInFrames: 15,
+    startFrame: 117,
+    durationInFrames: 10,
     dropdownItems: [],
   },
   {
     type: "type",
-    text: "\n\n",
+    text: "\n",
     replaceLength: 0,
     insertText: "",
-    startFrame: 116,
-    durationInFrames: 2,
+    startFrame: 127,
+    durationInFrames: 1,
     dropdownItems: [],
   },
   {
     type: "type",
-    text: "This is typed text. It looks real. Hopefully.",
+    text: "This is typed text.",
     replaceLength: 0,
     insertText: "",
-    startFrame: 118,
-    durationInFrames: 90,
+    startFrame: 128,
+    durationInFrames: 38,
+    dropdownItems: [],
+  },
+  {
+    type: "pause",
+    text: "",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 166,
+    durationInFrames: 12,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: " It looks real.",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 178,
+    durationInFrames: 30,
+    dropdownItems: [],
+  },
+  {
+    type: "pause",
+    text: "",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 208,
+    durationInFrames: 12,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: " Hopefully.",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 220,
+    durationInFrames: 22,
     dropdownItems: [],
   },
 ];
@@ -166,8 +211,8 @@ export const RemotionRoot: React.FC = () => {
         }}
         calculateMetadata={calculateMetadata}
         fps={30}
-        width={1140}
-        height={850}
+        width={1710}
+        height={1276}
       />
     </>
   );
