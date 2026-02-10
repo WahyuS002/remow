@@ -1,7 +1,7 @@
 import "./index.css";
 import { Composition } from "remotion";
-import { MyComposition } from "./Composition";
-import { codeEditorSchema } from "./CodeEditor";
+import { MyComposition } from "./composition";
+import { codeEditorSchema } from "./code-editor";
 import { type Action, buildTimeline } from "./typing";
 
 const actions: Action[] = [
