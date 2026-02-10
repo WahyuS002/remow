@@ -41,19 +41,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   segments,
 }) => {
   const frame = useCurrentFrame();
-  const { text, dropdownItems } = useMemo(
+  const { text, dropdownItems, lastTypingEndFrame } = useMemo(
     () => computeEditorState(frame, segments),
     [frame, segments],
   );
 
-  const cursorVisible = Math.floor(frame / 15) % 2 === 0;
+  // Cursor always visible during typing; blink resets when typing stops
+  const framesSinceTyping = frame - lastTypingEndFrame;
+  const cursorVisible = framesSinceTyping < 15 || Math.floor(framesSinceTyping / 15) % 2 === 0;
 
   // Find ":" position for dropdown placement
   const colonIndex = dropdownItems ? text.lastIndexOf(":") : -1;
   const showDropdown =
-    dropdownItems !== null &&
-    dropdownItems.length > 0 &&
-    colonIndex !== -1;
+    dropdownItems !== null && dropdownItems.length > 0 && colonIndex !== -1;
 
   return (
     <AbsoluteFill>
@@ -222,11 +222,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   left: `calc(24px + ${colonIndex}ch)`,
                   background: "#ffffff",
                   border: "1px solid #e5e5e5",
-                  borderRadius: 8,
-                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
+                  borderRadius: 3,
                   overflow: "hidden",
                   minWidth: 200,
                   zIndex: 10,
+                  padding: 4,
                 }}
               >
                 {dropdownItems.map((item, i) => (
@@ -236,8 +236,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                       display: "flex",
                       alignItems: "center",
                       gap: 10,
-                      padding: "8px 14px",
-                      backgroundColor: i === 0 ? "#d8ede2" : "transparent",
+                      padding: "0px 14px",
+                      backgroundColor: i === 0 ? "#d0e5e1" : "transparent",
                     }}
                   >
                     <span style={{ fontSize: 24 }}>{item.emoji}</span>
