@@ -113,6 +113,33 @@ const defaultSegments: Segment[] = [
     durationInFrames: 1,
     dropdownItems: [],
   },
+  {
+    type: "pause",
+    text: "",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 101,
+    durationInFrames: 15,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: "\n\n",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 116,
+    durationInFrames: 2,
+    dropdownItems: [],
+  },
+  {
+    type: "type",
+    text: "This is typed text. It looks real. Hopefully.",
+    replaceLength: 0,
+    insertText: "",
+    startFrame: 118,
+    durationInFrames: 90,
+    dropdownItems: [],
+  },
 ];
 
 const calculateMetadata = ({ props }: { props: CodeEditorProps }) => {

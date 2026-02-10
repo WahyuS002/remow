@@ -50,8 +50,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const framesSinceTyping = frame - lastTypingEndFrame;
   const cursorVisible = framesSinceTyping < 15 || Math.floor(framesSinceTyping / 15) % 2 === 0;
 
-  // Find ":" position for dropdown placement
-  const colonIndex = dropdownItems ? text.lastIndexOf(":") : -1;
+  // Split text into lines for multi-line rendering
+  const lines = text.split("\n");
+  const activeLineIndex = lines.length - 1;
+  const activeLine = lines[activeLineIndex];
+
+  // Find ":" position in active line for dropdown placement
+  const colonIndex = dropdownItems ? activeLine.lastIndexOf(":") : -1;
   const showDropdown =
     dropdownItems !== null && dropdownItems.length > 0 && colonIndex !== -1;
 
@@ -189,36 +194,42 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               lineHeight: "36px",
             }}
           >
-            {/* Active line */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "stretch",
-                backgroundColor: "#f1f2f1",
-                padding: "0 24px",
-              }}
-            >
-              <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
-                {text}
-              </span>
-              {cursorVisible && (
-                <span
+            {/* Lines */}
+            {lines.map((line, index) => {
+              const isActive = index === activeLineIndex;
+              return (
+                <div
+                  key={index}
                   style={{
-                    display: "inline-block",
-                    width: 2.5,
-                    backgroundColor: "#14b8a6",
-                    marginLeft: 1,
+                    display: "flex",
+                    alignItems: "stretch",
+                    backgroundColor: isActive ? "#f1f2f1" : "transparent",
+                    padding: "0 24px",
                   }}
-                />
-              )}
-            </div>
+                >
+                  <span style={{ color: "#1f2937", whiteSpace: "pre" }}>
+                    {line}
+                  </span>
+                  {isActive && cursorVisible && (
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: 2.5,
+                        backgroundColor: "#14b8a6",
+                        marginLeft: 1,
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
 
             {/* Emoji dropdown */}
             {showDropdown && (
               <div
                 style={{
                   position: "absolute",
-                  top: 56,
+                  top: 20 + (activeLineIndex + 1) * 36,
                   left: `calc(24px + ${colonIndex}ch)`,
                   background: "#ffffff",
                   border: "1px solid #e5e5e5",
