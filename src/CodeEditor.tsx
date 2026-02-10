@@ -1,11 +1,18 @@
+import { useMemo } from "react";
 import { AbsoluteFill, Img, staticFile, useCurrentFrame } from "remotion";
 import { z } from "zod";
+import { type Action, buildTimeline, getVisibleText } from "./typing";
+
+const actionSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("type"), text: z.string(), speed: z.number().optional() }),
+  z.object({ type: z.literal("wait"), frames: z.number() }),
+  z.object({ type: z.literal("newline") }),
+]);
 
 export const codeEditorSchema = z.object({
   backgroundImage: z.string(),
   filename: z.string(),
-  code: z.array(z.string()),
-  activeLine: z.number().min(1),
+  actions: z.array(actionSchema),
 });
 
 export type CodeEditorProps = z.infer<typeof codeEditorSchema>;
@@ -13,11 +20,14 @@ export type CodeEditorProps = z.infer<typeof codeEditorSchema>;
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   backgroundImage,
   filename,
-  code,
-  activeLine,
+  actions,
 }) => {
   const frame = useCurrentFrame();
+  const timeline = useMemo(() => buildTimeline(actions as Action[]), [actions]);
+  const visibleText = getVisibleText(frame, timeline);
+  const visibleLines = visibleText.split("\n");
   const cursorVisible = Math.floor(frame / 15) % 2 === 0;
+  const activeLineIndex = visibleLines.length - 1;
 
   return (
     <AbsoluteFill>
@@ -127,9 +137,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               lineHeight: "24px",
             }}
           >
-            {code.map((line, index) => {
+            {visibleLines.map((line, index) => {
               const lineNumber = index + 1;
-              const isActive = lineNumber === activeLine;
+              const isActive = index === activeLineIndex;
 
               return (
                 <div
