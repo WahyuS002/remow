@@ -1,54 +1,39 @@
-# Remotion video
+# remow
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+Copy-paste motion components for [Remotion](https://remotion.dev). Like [shadcn/ui](https://ui.shadcn.com), but for video.
 
-Welcome to your Remotion project!
+Browse the components, pick what you need, and drop them into your Remotion project.
 
-## Commands
+## Components
 
-**Install Dependencies**
+### Code Editor
 
-```console
-npm i
-```
+A macOS-style code editor with typing animation, emoji autocomplete dropdown, and per-segment timeline control.
 
-**Start Preview**
+- Segment-based action system (type, pause, select)
+- Non-linear typing for realistic variable-speed keystrokes
+- Emoji dropdown with filtering and selection
+- Each segment appears as a named Sequence bar in Remotion Studio
+- Kode Mono font via `@remotion/google-fonts`
+
+## Getting Started
 
 ```console
-npm run dev
+pnpm install
 ```
-
-**Render video**
 
 ```console
-npx remotion render
+pnpm dev
 ```
-
-**Upgrade Remotion**
 
 ```console
-npx remotion upgrade
+pnpm exec remotion render
 ```
 
-## Docs
+## How It Works
 
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
+Each component is a self-contained Remotion composition with a zod schema for props. Edit timing, text, and styling directly in the Remotion Studio props panel — every segment is a `<Sequence>` you can see and adjust in the timeline.
 
 ## License
 
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+See [Remotion licensing](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md) for details.
