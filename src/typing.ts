@@ -14,6 +14,30 @@ export type Timeline = {
   totalFrames: number;
 };
 
+export function codeToActions(
+  code: string,
+  typingSpeed: number,
+  pauseAfterLine: number,
+): Action[] {
+  const lines = code.split("\n");
+  const actions: Action[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    actions.push({ type: "type", text: line, speed: typingSpeed });
+
+    if (line.length > 0 && pauseAfterLine > 0) {
+      actions.push({ type: "wait", frames: pauseAfterLine });
+    }
+
+    if (i < lines.length - 1) {
+      actions.push({ type: "newline" });
+    }
+  }
+
+  return actions;
+}
+
 export function buildTimeline(actions: Action[]): Timeline {
   let frame = 0;
   const entries: TimelineEntry[] = [];

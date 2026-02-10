@@ -1,36 +1,26 @@
 import "./index.css";
 import { Composition } from "remotion";
 import { MyComposition } from "./composition";
-import { codeEditorSchema } from "./code-editor";
-import { type Action, buildTimeline } from "./typing";
+import { CodeEditorProps, codeEditorSchema } from "./code-editor";
+import { buildTimeline, codeToActions } from "./typing";
 
-const actions: Action[] = [
-  { type: "type", text: 'import React from "react";', speed: 1.5 },
-  { type: "wait", frames: 8 },
-  { type: "newline" },
-  { type: "newline" },
-  { type: "type", text: "export const App: React.FC = () => {", speed: 1.5 },
-  { type: "wait", frames: 8 },
-  { type: "newline" },
-  { type: "type", text: "  return (", speed: 1.2 },
-  { type: "wait", frames: 6 },
-  { type: "newline" },
-  { type: "type", text: '    <div className="app">', speed: 1.2 },
-  { type: "wait", frames: 6 },
-  { type: "newline" },
-  { type: "type", text: "      <h1>Hello, World!</h1>", speed: 1 },
-  { type: "wait", frames: 10 },
-  { type: "newline" },
-  { type: "type", text: "    </div>", speed: 1.5 },
-  { type: "wait", frames: 6 },
-  { type: "newline" },
-  { type: "type", text: "  );", speed: 1.5 },
-  { type: "wait", frames: 6 },
-  { type: "newline" },
-  { type: "type", text: "};", speed: 1.5 },
-];
+const calculateMetadata = ({ props }: { props: CodeEditorProps }) => {
+  const actions = codeToActions(props.code, props.typingSpeed, props.pauseAfterLine);
+  const timeline = buildTimeline(actions);
+  return {
+    durationInFrames: timeline.totalFrames + 30,
+  };
+};
 
-const timeline = buildTimeline(actions);
+const defaultCode = `import React from "react";
+
+export const App: React.FC = () => {
+  return (
+    <div className="app">
+      <h1>Hello, World!</h1>
+    </div>
+  );
+};`;
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -42,9 +32,11 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{
           backgroundImage: "background.jpg",
           filename: "App.tsx",
-          actions,
+          code: defaultCode,
+          typingSpeed: 1.5,
+          pauseAfterLine: 8,
         }}
-        durationInFrames={timeline.totalFrames + 30}
+        calculateMetadata={calculateMetadata}
         fps={30}
         width={1280}
         height={720}

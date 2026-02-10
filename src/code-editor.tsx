@@ -1,18 +1,14 @@
 import { useMemo } from "react";
 import { AbsoluteFill, Img, staticFile, useCurrentFrame } from "remotion";
 import { z } from "zod";
-import { type Action, buildTimeline, getVisibleText } from "./typing";
-
-const actionSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("type"), text: z.string(), speed: z.number().optional() }),
-  z.object({ type: z.literal("wait"), frames: z.number() }),
-  z.object({ type: z.literal("newline") }),
-]);
+import { buildTimeline, codeToActions, getVisibleText } from "./typing";
 
 export const codeEditorSchema = z.object({
   backgroundImage: z.string(),
   filename: z.string(),
-  actions: z.array(actionSchema),
+  code: z.string(),
+  typingSpeed: z.number().min(0.1).max(5).step(0.1),
+  pauseAfterLine: z.number().min(0).max(30).step(1),
 });
 
 export type CodeEditorProps = z.infer<typeof codeEditorSchema>;
@@ -20,10 +16,16 @@ export type CodeEditorProps = z.infer<typeof codeEditorSchema>;
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   backgroundImage,
   filename,
-  actions,
+  code,
+  typingSpeed,
+  pauseAfterLine,
 }) => {
   const frame = useCurrentFrame();
-  const timeline = useMemo(() => buildTimeline(actions as Action[]), [actions]);
+  const actions = useMemo(
+    () => codeToActions(code, typingSpeed, pauseAfterLine),
+    [code, typingSpeed, pauseAfterLine],
+  );
+  const timeline = useMemo(() => buildTimeline(actions), [actions]);
   const visibleText = getVisibleText(frame, timeline);
   const visibleLines = visibleText.split("\n");
   const cursorVisible = Math.floor(frame / 15) % 2 === 0;
